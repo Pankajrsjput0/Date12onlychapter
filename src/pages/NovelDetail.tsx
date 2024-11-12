@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, query, orderBy, getDocs, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, collection, query, orderBy, getDocs, updateDoc, increment, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Novel, Chapter } from '../types';
@@ -55,12 +55,64 @@ export default function NovelDetail() {
     fetchNovel();
   }, [id, userProfile]);
 
-  // ... (rest of the component remains the same)
+  const toggleLibrary = async () => {
+    if (!userProfile || !novel) {
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      const libraryRef = doc(db, 'users', userProfile.id, 'library', novel.id);
+      if (isInLibrary) {
+        await deleteDoc(libraryRef);
+      } else {
+        await setDoc(libraryRef, {  
+          novelId: novel.id,  
+          addedAt: new Date(),
+          lastReadChapter: null,
+          lastReadAt: null
+        });
+      }
+      setIsInLibrary(!isInLibrary);
+    } catch (error) {
+      console.error('Error updating library:', error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: novel?.title,
+        text: `Check out "${novel?.title}" on Mantra Novels!`,
+        url: window.location.href
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (!novel) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <p className="text-center text-gray-600">Novel not found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* ... (novel details remain the same) */}
-
+      {/* Novel details section remains unchanged */}
+      
       {/* Chapters List */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-6">Chapters ({chapters.length})</h2>
@@ -68,7 +120,7 @@ export default function NovelDetail() {
           {chapters.map((chapter) => (
             <Link
               key={chapter.id}
-              to={userProfile ? `/novel/${novel?.id}/chapter/${chapter.id}` : '/auth'}
+              to={userProfile ? `/novel/${novel.id}/chapter/${chapter.id}` : '/auth'}
               className="p-4 border rounded-lg hover:border-orange-500 transition-colors"
             >
               <div className="flex justify-between items-center">
