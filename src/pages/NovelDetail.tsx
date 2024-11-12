@@ -87,7 +87,9 @@ export default function NovelDetail() {
   const handleShare = async () => {
     try {
       await navigator.share({
-        title: novel?.title,text:`Check out "${novel?.title}"on Mantra Novels!`, url: window.location.href
+        title: novel?.title,
+        text: `Check out "${novel?.title}" on Mantra Novels!`,
+        url: window.location.href
       });
     } catch (error) {
       console.error('Error sharing:', error);
@@ -165,9 +167,8 @@ export default function NovelDetail() {
           <div className="flex gap-4 mb-8">
             {chapters.length > 0 && (
               <Link
-                to={/novel/${novel.id}/chapter/${chapters[0].id}}
+                to={`/novel/${novel.id}/chapter/${chapters[0].id}`}
                 className="flex items-center gap-2 px-6 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors">
-              
                 <BookOpen className="h-5 w-5" />
                 Start Reading
               </Link>
@@ -175,11 +176,9 @@ export default function NovelDetail() {
             {userProfile && (
               <button
                 onClick={toggleLibrary}
-                className={flex items-center gap-2 px-6 py-2 border rounded-full transition-colors ${
-                  isInLibrary? 'bg-orange-500 text-white border-orange-500': 'border-orange-500 text-orange-500 hover:bg-orange-50'
-                }}
+                className={`flex items-center gap-2 px-6 py-2 border rounded-full transition-colors ${isInLibrary ? 'bg-orange-500 text-white border-orange-500' : 'border-orange-500 text-orange-500 hover:bg-orange-50'}`}
               >
-                <Heart className={h-5 w-5 ${isInLibrary ? 'fill-current' : ''}} />
+                <Heart className={`h-5 w-5 ${isInLibrary ? 'fill-current' : ''}`} />
                 {isInLibrary ? 'In Library' : 'Add to Library'}
               </button>
             )}
@@ -206,7 +205,7 @@ export default function NovelDetail() {
           {chapters.map((chapter) => (
             <Link
               key={chapter.id}
-              to={/novel/${novel.id}/chapter/${chapter.id}}
+              to={`/novel/${novel.id}/chapter/${chapter.id}`}
               className="p-4 border rounded-lg hover:border-orange-500 transition-colors"
             >
               <div>
@@ -224,4 +223,3 @@ export default function NovelDetail() {
     </div>
   );
 }
-``
