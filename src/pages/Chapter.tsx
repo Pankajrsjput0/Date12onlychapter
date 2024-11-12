@@ -20,7 +20,10 @@ export default function ChapterPage() {
 
   useEffect(() => {
     const fetchChapterData = async () => {
-      if (!novelId || !chapterId) return;
+      if (!novelId || !chapterId || !userProfile) {
+        navigate('/auth');
+        return;
+      }
 
       try {
         const novelDoc = await getDoc(doc(db, 'novels', novelId));
@@ -50,12 +53,10 @@ export default function ChapterPage() {
         if (currentChapter) {
           setChapter(currentChapter);
 
-          if (userProfile) {
-            await updateDoc(doc(db, 'users', userProfile.id, 'library', novelId), {
-              lastReadChapter: currentChapter.chapterNumber,
-              lastReadAt: new Date()
-            });
-          }
+          await updateDoc(doc(db, 'users', userProfile.id, 'library', novelId), {
+            lastReadChapter: currentChapter.chapterNumber,
+            lastReadAt: new Date()
+          });
         }
       } catch (error) {
         console.error('Error fetching chapter:', error);
@@ -65,10 +66,44 @@ export default function ChapterPage() {
     };
 
     fetchChapterData();
-    setHasReachedBottom(false);
-  }, [novelId, chapterId, userProfile]);
+  }, [novelId, chapterId, userProfile, navigate]);
 
-  // ... (rest of the component remains the same)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current || hasReachedBottom) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+      const isBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+
+      if (isBottom && !hasReachedBottom) {
+        setHasReachedBottom(true);
+        if (novelId && chapterId) {
+          updateDoc(doc(db, 'novels', novelId, 'chapters', chapterId), {
+            views: increment(1)
+          });
+        }
+      }
+    };
+
+    const contentElement = contentRef.current;
+    if (contentElement) {
+      contentElement.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (contentElement) {
+        contentElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [hasReachedBottom, novelId, chapterId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+      </div>
+    );
+  }
 
   if (!chapter || !novel) {
     return (
@@ -107,7 +142,29 @@ export default function ChapterPage() {
           ))}
         </div>
 
-        {/* ... (navigation buttons remain the same) */}
+        <div className="flex justify-between items-center mt-8">
+          {prevChapter ? (
+            <Link
+              to={`/novel/${novelId}/chapter/${prevChapter.id}`}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Previous Chapter
+            </Link>
+          ) : (
+            <div />
+          )}
+          
+          {nextChapter && (
+            <Link
+              to={`/novel/${novelId}/chapter/${nextChapter.id}`}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              Next Chapter
+              <ChevronRight className="h-5 w-5" />
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
