@@ -87,7 +87,7 @@ export default function NovelDetail() {
   const handleShare = async () => {
     try {
       await navigator.share({
-        title: novel?.title,text:Check out "${novel?.title}"on Mantra Novels!, url: window.location.href
+        title: novel?.title,text:`Check out "${novel?.title}"on Mantra Novels!`, url: window.location.href
       });
     } catch (error) {
       console.error('Error sharing:', error);
