@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { GENRES } from '../types';
 import { Trophy, TrendingUp } from 'lucide-react';
+import NovelCard from '../components/NovelCard';
 
 export default function Ranking() {
   const [selectedGenre, setSelectedGenre] = useState('All');
@@ -75,26 +76,11 @@ export default function Ranking() {
                 )}
               </div>
 
-              <div className="flex-1">
-                <h3 className="text-xl font-bold mb-1">{novel.title}</h3>
-                <p className="text-gray-600">by {novel.author}</p>
-              </div>
+              <NovelCard novel={novel} />
 
-              <div className="flex items-center gap-8">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-gray-500" />
-                  <span className="text-lg font-semibold">{novel.views}</span>
-                </div>
-                <div className="flex gap-2">
-                  {novel.genre.map(g => (
-                    <span
-                      key={g}
-                      className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm"
-                    >
-                      {g}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <TrendingUp className="h-5 w-5 text-gray-500" />
+                <span className="text-lg font-semibold">{novel.views}</span>
               </div>
             </div>
           ))}
