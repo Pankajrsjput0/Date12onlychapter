@@ -7,6 +7,8 @@ export default function Navbar() {
   const { userProfile } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -48,13 +50,13 @@ export default function Navbar() {
 
           <div className="md:hidden">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500"
+              onClick={toggleMenu}
+              className="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
             >
               {isMenuOpen ? (
-                <X className="block h-6 w-6" aria-hidden="true" />
+                <X className="h-6 w-6" />
               ) : (
-                <Menu className="block h-6 w-6" aria-hidden="true" />
+                <Menu className="h-6 w-6" />
               )}
             </button>
           </div>
