@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Novels collection and its chapters
+    match /novels/{novelId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && resource.data.uploadBy == request.auth.uid;
+      
+      // Important: Correct path for chapters subcollection
+      match /chapters/{chapterId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update, delete: if request.auth != null && 
+          get(/databases/$(database)/documents/novels/$(novelId)).data.uploadBy == request.auth.uid;
+      }
+    }
+
+    // User data
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      match /library/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
